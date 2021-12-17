@@ -5,22 +5,26 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   SPI.begin();
   mfrc522.PCD_Init();   // آماده کردن MFRC522 
   Serial.println("کارت خود را نزدیک ماژول کنید...");
-  pinMode(10,OUTPUT);
-  pinMode(4,INPUT);
-  pinMode(5,INPUT);
+  pinMode(4,OUTPUT);
+  pinMode(5,OUTPUT);
+  pinMode(10,INPUT);
+  pinMode(2,INPUT);
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+
 }
 void loop()
 {
-  if(digitalRead(5))
+  if(digitalRead(10))
   {
-  Serial.print("5");
+  Serial.print("10");
   }
-//  if(digitalRead(4))
-//  Serial.print("4");
+ if(digitalRead(2))
+   Serial.print("2");
   //بررسی کارت جدید
   if ( ! mfrc522.PICC_IsNewCardPresent())
   {
@@ -48,9 +52,11 @@ void loop()
   if (content.substring(1) == "C6 3E 7D 2B") //شناسه UID کارت خود را اینجا جایگزین کنید
   {
     Serial.println("کارت مورد تایید است.");
-    digitalWrite(10, HIGH);
+    digitalWrite(4, HIGH);
+    digitalWrite(5, HIGH);
     delay(1000);
-    digitalWrite(10, LOW);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
     delay(1000);
   }
   else
