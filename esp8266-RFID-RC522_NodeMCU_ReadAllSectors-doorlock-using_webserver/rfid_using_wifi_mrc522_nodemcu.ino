@@ -4,6 +4,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 MDNSResponder mdns;
+String card,test;
 const char* ssid = "Galaxy A127724";
 const char* password = "ezaz0462";
 ESP8266WebServer server(80);
@@ -78,6 +79,8 @@ void handleRoot() {
     server.send(301);
     return;
   }
+  else
+  {
   String content =  "<!DOCTYPE html> <html>\n";
   content += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   content += "<title>Rushin Door Lock</title>\n";
@@ -102,6 +105,7 @@ void handleRoot() {
   content += "<footer><p><a href=\"cybele.ir\">cybele.ir</a></p></footer></body>";
   content += "<br><br>You can access this page until you <a class=\"log_out\" href=\"/login?DISCONNECT=YES\">Log Out</a></body></html>";
   server.send(200, "text/html", content);
+  }
 }
 
 //no need authentification
@@ -178,6 +182,7 @@ void setup(void)
     digitalWrite(4, HIGH);
     delay(1000);
     digitalWrite(4, LOW);
+    delay(500);
     handleRoot();
   });
  
@@ -186,6 +191,7 @@ void setup(void)
     digitalWrite(5, HIGH);
     delay(1000);
     digitalWrite(5, LOW);
+    delay(500);
     handleRoot();
   });
  
@@ -199,12 +205,42 @@ void setup(void)
 void loop(void)
 {
   server.handleClient();
-//  if(digitalRead(10))
-//  {
-//  Serial.print("10");
-//  }
-// if(digitalRead(2))
-//   Serial.print("2");
+  
+  
+  while(digitalRead(2))
+  {
+    card="";
+  if ( ! mfrc522.PICC_IsNewCardPresent())
+  {
+    return;
+  }
+  // انتخاب و خواندن کارت
+  if ( ! mfrc522.PICC_ReadCardSerial())
+  {
+    return;
+  }
+  //نمایش شناسه UID کارت
+  Serial.print("UID tag :");
+  String content = "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++)
+  {
+    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+    Serial.print(mfrc522.uid.uidByte[i], HEX);
+    content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+    content.concat(String(mfrc522.uid.uidByte[i], HEX));
+    while(digitalRead(2));
+  }
+  for(int i=1;i<12;i++)
+  card+=content[i];
+    card.toUpperCase();
+    Serial.println(card);
+  }
+  while(digitalRead(10))
+{
+card="";
+   
+}
   //بررسی کارت جدید
   if ( ! mfrc522.PICC_IsNewCardPresent())
   {
@@ -226,10 +262,11 @@ void loop(void)
     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
     content.concat(String(mfrc522.uid.uidByte[i], HEX));
   }
-  Serial.println();
-  Serial.print("Message : ");
+    Serial.println();
+//  Serial.print("Message : ");
   content.toUpperCase();
-  if (content.substring(1) == "C6 3E 7D 2B") //شناسه UID کارت خود را اینجا جایگزین کنید
+ 
+  if (content.substring(1) =="C6 3E 7D 2B" || content.substring(1) ==card) //شناسه UID کارت خود را اینجا جایگزین کنید
   {
     Serial.println("کارت مورد تایید است.");
     digitalWrite(4, HIGH);
@@ -242,7 +279,13 @@ void loop(void)
   else
   {
     Serial.println(" کارت غیر مجاز");
+    Serial.print(card);
+    Serial.print(card);
+    Serial.print(test);
+    Serial.print(test);
     delay(1000);
   }
+  
+  
    
 }
